@@ -35,7 +35,7 @@ from src.utils import load_config
 
 
 # Set API key
-os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+# os.environ["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
 
 
 def format_docs(docs: list[Document]):
@@ -44,7 +44,7 @@ def format_docs(docs: list[Document]):
 
 class GeminiChain:
 
-    def __init__(self, chat_memory):
+    def __init__(self, chat_memory, model_name=None, api_key=None):
 
         prompt = PromptTemplate(
             template="""
@@ -67,9 +67,13 @@ class GeminiChain:
         )
 
         config = load_config()
+        resolved_model = model_name or config["chat_model"]["model"]
+        resolved_api_key = api_key or os.getenv("GEMINI_API_KEY")
 
         self.llm = ChatGoogleGenerativeAI(
-            model=config["chat_model"]["model"],
+            model=resolved_model,
+            google_api_key=resolved_api_key,
+            # model=config["chat_model"]["model"],
             temperature=config["chat_model"]["temperature"]
             )
 
@@ -94,6 +98,8 @@ class GeminiRAGChain:
     def __init__(
         self,
         chat_memory,
+        model_name=None,
+        api_key=None,
         uploaded_file=None
     ):
 
@@ -106,9 +112,13 @@ class GeminiRAGChain:
             self.update_knowledge_base(uploaded_file)
 
         config = load_config()
+        resolved_model = model_name or config["chat_model"]["model"]
+        resolved_api_key = api_key or os.getenv("GEMINI_API_KEY")
 
         self.llm = ChatGoogleGenerativeAI(
-            model=config["chat_model"]["model"],
+            # model=config["chat_model"]["model"],
+            model=resolved_model,
+            google_api_key=resolved_api_key,
             temperature=config["chat_model"]["temperature"]
             )
 

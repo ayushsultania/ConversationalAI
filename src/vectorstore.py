@@ -23,10 +23,25 @@ load_dotenv()
 # EMBEDDING MODEL
 # -----------------------------------------------------
 
-def get_embedding_model():
-    return GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001"
+def get_embedding_model(api_key=None):
+    resolved_api_key = (
+        api_key
+        or os.getenv("GOOGLE_API_KEY")
+        or os.getenv("GEMINI_API_KEY")
     )
+
+    if not resolved_api_key:
+        raise EnvironmentError(
+            "Missing `GOOGLE_API_KEY` or `GEMINI_API_KEY` in environment variables."
+        )
+
+    return GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=resolved_api_key
+    )
+    # return GoogleGenerativeAIEmbeddings(
+    #     model="models/gemini-embedding-001"
+    # )
 
 
 # -----------------------------------------------------
@@ -104,7 +119,8 @@ class VectorDB:
         self,
         db_name,
         index_name,
-        cache_dir=None
+        cache_dir=None,
+        api_key=None
     ):
 
         embedding_model = get_embedding_model()
